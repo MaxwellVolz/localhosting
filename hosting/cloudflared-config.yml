@@ -1,0 +1,14 @@
+# Cloudflare Tunnel Configuration
+# Place in: ~/.cloudflared/config.yml
+# Replace YOUR_TUNNEL_ID with your actual tunnel ID
+
+tunnel: YOUR_TUNNEL_ID
+credentials-file: /home/YOUR_USER/.cloudflared/YOUR_TUNNEL_ID.json
+
+ingress:
+  # Route your domain to local NGINX
+  - hostname: your-site.com
+    service: http://localhost:80
+
+  # Catch-all rule (required)
+  - service: http_status:404

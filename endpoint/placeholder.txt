@@ -1,0 +1,8 @@
+This directory is reserved for API endpoint boilerplates.
+
+Potential additions:
+- Express.js API server setup
+- FastAPI Python endpoints
+- WebSocket server configurations
+- Database connection examples
+- Authentication middleware

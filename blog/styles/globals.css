@@ -1,0 +1,139 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =======================
+   🌗 Theme Colors
+   ======================= */
+:root {
+  --bg: #ffffff;
+  --fg: #222222;
+  --link: #0070f3;
+  --code-bg: #f1f1f1;
+  --pre-bg: #f6f8fa;
+}
+
+/* [data-theme='dark'] {
+  --bg: #1e1e1e;
+  --fg: #eaeaea;
+  --link: #6ab0f3;
+  --code-bg: #333333;
+  --pre-bg: #2a2a2a;
+} */
+
+/* =======================
+   📐 Root Layout
+   ======================= */
+
+
+html,
+body,
+#__next {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+
+body {
+  font-family: system-ui, sans-serif;
+  background-color: var(--bg);
+  color: var(--fg);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+@layer base {
+  @font-face {
+    font-family: 'Inter';
+    src: url('/fonts/Inter-Variable.ttf') format('truetype');
+    font-weight: 100 900;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'Orbitron';
+    src: url('/fonts/Orbitron-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'Orbitron';
+    src: url('/fonts/Orbitron-Medium.ttf') format('truetype');
+    font-weight: 500;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'Orbitron';
+    src: url('/fonts/Orbitron-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'Roboto Mono';
+    src: url('/fonts/RobotoMono-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'Roboto Mono';
+    src: url('/fonts/RobotoMono-SemiBold.ttf') format('truetype');
+    font-weight: 600;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'Roboto Mono';
+    src: url('/fonts/RobotoMono-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-display: swap;
+  }
+}
+
+
+pre {
+  position: relative;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  background: #0d1117;
+  color: white;
+  overflow: auto;
+}
+
+pre .copy-button {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  font-size: 0.75rem;
+  background: #444;
+  color: #fff;
+  border: none;
+  padding: 0.2rem 0.5rem;
+  cursor: pointer;
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+pre:hover .copy-button {
+  opacity: 1;
+}
+
+pre code {
+  font-family: monospace;
+  font-size: 0.875rem;
+  font-size: .6em !important;
+}
+
+p img {
+  border-radius: 0.5rem;
+}
+
+/* global.css or tailwind layer */
+.kbd {
+  @apply bg-zinc-800 text-white px-2 py-0.5 rounded font-mono text-sm;
+}
