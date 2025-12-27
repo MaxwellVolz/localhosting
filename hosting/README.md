@@ -210,7 +210,7 @@ echo "test" >> content/posts/welcome.mdx
 # Commit and push
 git add .
 git commit -m "Test deployment"
-git push origin master
+git push
 
 # Watch Jenkins build
 # Check NGINX logs
@@ -348,19 +348,3 @@ sudo /usr/local/bin/deploy_blog.sh your-site out
 # Copy previous build from Jenkins artifacts
 sudo cp -r /var/lib/jenkins/jobs/YOUR-JOB/builds/PREVIOUS-BUILD/archive/out/* /var/www/your-site/
 ```
-
-## Alternative Deployments
-
-This setup can be adapted for:
-- **Multiple sites**: Add more sites to NGINX, route different domains in Cloudflare Tunnel
-- **Development/staging**: Create separate Jenkins jobs, NGINX configs, tunnel routes
-- **Other frameworks**: Modify Jenkinsfile build commands, works with any static site generator
-
-## Cost Breakdown
-
-- **Server**: $5-10/month (Linode, DigitalOcean, Hetzner)
-- **Cloudflare Tunnel**: Free
-- **Domain**: $10-15/year
-- **Total**: ~$70-130/year
-
-Much cheaper than managed hosting while you control everything!

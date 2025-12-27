@@ -1,0 +1,294 @@
+---
+title: So You Wanna Be an Endpoint
+date: 2025-12-26T15:57:00.000-08:00
+pinned: false
+draft: true
+work: false
+tags: backend python fastapi  
+---
+
+This article continues the **localhost'ing** series (yeah, we are calling it that now hah) and explains how to add a **minimal FastAPI backend** to the same stack used by the static blog.
+
+Use cases:
+- Contact forms
+- Webhooks
+- Simple data ingestion
+- “I just need a POST endpoint”
+
+No Kubernetes. No Docker required. No public IP.
+
+Same NGINX. Same Cloudflare Tunnel.
+
+> If you are trying to build a startup-scale API, this is not for you.  
+
+If you want a clean, boring, dependable endpoint, keep reading.
+
+- [Architecture Overview](#architecture-overview)
+- [Why FastAPI](#why-fastapi)
+- [Backend Setup](#backend-setup)
+  - [Install Dependencies](#install-dependencies)
+- [Choose Your Adventure](#choose-your-adventure)
+  - [Create the App](#create-the-app)
+  - [Run Locally](#run-locally)
+- [NGINX Reverse Proxy](#nginx-reverse-proxy)
+- [Systemd Service](#systemd-service)
+- [Cloudflare Tunnel Integration](#cloudflare-tunnel-integration)
+- [Frontend Usage](#frontend-usage)
+- [Hardening Notes](#hardening-notes)
+- [References](#references)
+
+---
+
+## Architecture Overview
+
+```
+
+Browser
+↓
+Cloudflare Tunnel
+↓
+NGINX (TLS, rate limits)
+↓
+FastAPI (localhost only)
+↓
+File / Email / DB
+
+```
+
+Important properties:
+- FastAPI never binds to a public interface
+- NGINX is the only exposed surface
+- Cloudflare Tunnel handles ingress security
+
+---
+
+## Why FastAPI
+
+- One file can be the entire backend
+- Type hints double as validation
+- Async by default
+- Zero ceremony
+
+If you prefer Flask, this still applies. The NGINX and systemd parts do not change.
+
+---
+
+## Backend Setup
+
+### Install Dependencies
+
+Use a virtualenv. Do not install this system-wide.
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install fastapi uvicorn
+```
+
+---
+
+## Choose Your Adventure
+
+**Create the App**
+
+*or*
+
+**Clone the Example**
+
+---
+
+### Create the App
+
+`app.py`
+
+```python
+from fastapi import FastAPI, Form
+from datetime import datetime
+import json
+
+app = FastAPI()
+
+@app.post("/contact")
+async def contact(
+    email: str = Form(...),
+    message: str = Form(...)
+):
+    payload = {
+        "email": email,
+        "message": message,
+        "ts": datetime.utcnow().isoformat()
+    }
+
+    with open("/var/data/contact.jsonl", "a") as f:
+        f.write(json.dumps(payload) + "\n")
+
+    return {"ok": True}
+```
+
+This does three things:
+
+* Validates input
+* Appends data
+* Returns JSON
+
+That is it.
+
+---
+
+### Run Locally
+
+```bash
+uvicorn app:app --host 127.0.0.1 --port 9000
+```
+
+Test it:
+
+```bash
+curl -X POST http://127.0.0.1:9000/contact \
+  -d "email=test@example.com" \
+  -d "message=hello"
+```
+
+---
+
+## NGINX Reverse Proxy
+
+Add an API location to the same site config as your static site.
+
+`/etc/nginx/sites-available/intervolz.com`
+
+```nginx
+limit_req_zone $binary_remote_addr zone=api:10m rate=5r/m;
+
+server {
+  listen 80;
+  server_name intervolz.com www.intervolz.com;
+  root /var/www/intervolz;
+  index index.html;
+
+  location / {
+    try_files $uri $uri/ =404;
+  }
+
+  location /api/ {
+    limit_req zone=api burst=5 nodelay;
+    proxy_pass http://127.0.0.1:9000/;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+  }
+}
+```
+
+Reload:
+
+```bash
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+---
+
+## Systemd Service
+
+This keeps FastAPI alive and boring.
+
+`/etc/systemd/system/fastapi.service`
+
+```ini
+[Unit]
+Description=FastAPI Backend
+After=network.target
+
+[Service]
+User=www-data
+WorkingDirectory=/var/www/api
+ExecStart=/var/www/api/venv/bin/uvicorn app:app --host 127.0.0.1 --port 9000
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Enable it:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now fastapi
+```
+
+Check status:
+
+```bash
+sudo systemctl status fastapi
+```
+
+---
+
+## Cloudflare Tunnel Integration
+
+No changes required if your tunnel already points at NGINX.
+
+Your existing config still works:
+
+```yaml
+ingress:
+  - hostname: intervolz.com
+    service: http://localhost:80
+  - hostname: www.intervolz.com
+    service: http://localhost:80
+  - service: http_status:404
+```
+
+The API is just another path.
+
+---
+
+## Frontend Usage
+
+From your static site:
+
+```js
+fetch("/api/contact", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/x-www-form-urlencoded"
+  },
+  body: new URLSearchParams({
+    email,
+    message
+  })
+})
+```
+
+No CORS issues. Same origin. Simple.
+
+---
+
+## Hardening Notes
+
+Minimum recommendations:
+
+* Rate limit at NGINX
+* Never expose FastAPI directly
+* Append-only storage
+* Validate everything
+
+Optional upgrades:
+
+* HMAC token header
+* CAPTCHA
+* Email via SES or Postmark
+* JSON schema validation
+
+Do not overengineer this.
+
+---
+
+## References
+
+* [https://fastapi.tiangolo.com/](https://fastapi.tiangolo.com/)
+* [https://www.uvicorn.org/](https://www.uvicorn.org/)
+* [https://docs.nginx.com/](https://docs.nginx.com/)
+* [https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/](https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/)
+
+---
+

@@ -7,7 +7,7 @@ A collection of ready-to-deploy boilerplates for self-hosted home server setups.
 ```
 localhosting/
 ├── blog/           # Next.js + MDX static blog with CMS
-├── endpoint/       # API server boilerplates (coming soon)
+├── api/            # FastAPI backend boilerplate
 └── hosting/        # Deployment configurations (Jenkins, NGINX, Cloudflare)
 ```
 
@@ -37,6 +37,12 @@ See [hosting/README.md](hosting/README.md) for complete deployment guide.
 - Tailwind CSS for styling
 - TypeScript support
 
+**API**:
+- FastAPI with type hints
+- SQLAlchemy ORM
+- Pydantic validation
+- Auto-generated docs
+
 **Deployment**:
 - Jenkins CI/CD pipeline
 - NGINX web server
@@ -57,8 +63,8 @@ See [hosting/README.md](hosting/README.md) for complete deployment guide.
 ## Documentation
 
 - [Blog Setup & Usage](blog/README.md)
+- [FastAPI Backend](api/README.md)
 - [Deployment Guide](hosting/README.md)
-- [Endpoint Examples](endpoint/README.md) (coming soon)
 
 ## License
 
