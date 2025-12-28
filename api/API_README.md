@@ -50,6 +50,10 @@ api/
 - `GET /health` - Health check
 - `GET /ping` - Ping/pong
 
+**Contact Form** (`/api/v1/contact`):
+- `POST /` - Submit contact form (sends emails in background)
+- `POST /send-now` - Submit contact form (waits for email confirmation)
+
 **Items** (`/api/v1/items`):
 - `GET /` - List items (paginated)
 - `GET /{id}` - Get item
@@ -58,6 +62,24 @@ api/
 - `DELETE /{id}` - Delete item
 
 ## Example Usage
+
+### Contact Form
+
+```bash
+# Submit contact form
+curl -X POST http://localhost:8000/api/v1/contact/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "John Doe",
+    "email": "john@example.com",
+    "phone": "555-1234",
+    "message": "Hello!"
+  }'
+```
+
+See [CONTACT_FORM_SETUP.md](CONTACT_FORM_SETUP.md) for complete email configuration guide.
+
+### Items CRUD
 
 ```bash
 # Create item
@@ -85,7 +107,17 @@ HOST=0.0.0.0
 PORT=8000
 DATABASE_URL=sqlite:///./app.db
 CORS_ORIGINS=http://localhost:3000,http://localhost:8000
+
+# Email settings (for contact form)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USERNAME=your-email@gmail.com
+SMTP_PASSWORD=your-app-password
+SMTP_FROM_EMAIL=your-email@gmail.com
+CONTACT_EMAIL_RECIPIENT=your-email@gmail.com
 ```
+
+**Email Setup**: See [CONTACT_FORM_SETUP.md](CONTACT_FORM_SETUP.md) for detailed email configuration.
 
 ## Testing
 

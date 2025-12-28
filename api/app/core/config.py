@@ -25,6 +25,15 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
+    # Email Configuration
+    SMTP_HOST: str = "smtp.gmail.com"
+    SMTP_PORT: int = 587
+    SMTP_USERNAME: str = ""
+    SMTP_PASSWORD: str = ""
+    SMTP_FROM_EMAIL: str = ""
+    SMTP_USE_TLS: bool = True
+    CONTACT_EMAIL_RECIPIENT: str = ""  # Where contact form submissions are sent
+
     model_config = SettingsConfigDict(env_file=".env", case_sensitive=True)
 
 
