@@ -1,3 +1,6 @@
+# Custom
+zz*.md
+
 # Dependencies
 node_modules/
 package-lock.json
