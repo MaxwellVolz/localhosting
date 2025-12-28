@@ -77,7 +77,7 @@ curl -X POST http://localhost:8000/api/v1/contact/ \
   -d '{
     "name": "John Doe",
     "email": "john@example.com",
-    "phone": "555-1234",
+    "phone": "1-800-555-1234",
     "message": "This is a test message"
   }'
 ```

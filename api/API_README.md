@@ -140,6 +140,20 @@ gunicorn app.main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
 
 ### Systemd Service
 
+#### Note
+
+Deactivate your `venv` and setup python:
+
+```sh
+cd /var/www/api
+sudo -u www-data python3 -m venv venv
+
+sudo -u www-data /var/www/api/venv/bin/python -m pip install -r requirements.txt
+```
+
+For our linux box server we will copy `/localhosting/api` to the **Standard, boring, correct location**: `/var/www/api`
+
+Create the following: `sudo vim /etc/systemd/system/fastapi.service`
 ```ini
 [Unit]
 Description=FastAPI Backend
@@ -147,21 +161,52 @@ After=network.target
 
 [Service]
 User=www-data
+Group=www-data
 WorkingDirectory=/var/www/api
-ExecStart=/var/www/api/venv/bin/uvicorn app:app --host 127.0.0.1 --port 8000
+ExecStart=/var/www/api/venv/bin/gunicorn app.main:app \
+  -w 4 \
+  -k uvicorn.workers.UvicornWorker \
+  --bind 127.0.0.1:8000
 Restart=always
+Environment=PYTHONUNBUFFERED=1
 
 [Install]
 WantedBy=multi-user.target
 ```
 
+Restart the service: 
+
+```sh
+sudo systemctl daemon-reexec
+
+sudo systemctl daemon-reload
+
+sudo systemctl restart fastapi
+```
+
+Check on it
+
+```sh
+sudo systemctl status fastapi
+journalctl -u fastapi -f
+```
+
 ### NGINX Proxy
 
+Add to existing nginx setup: `vim /etc/nginx/sites-available/existingwebsite.com`
+
 ```nginx
+# Proxy API requests to FastAPI
 location /api/ {
-    proxy_pass http://localhost:8000/;
+    proxy_pass http://localhost:8000;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection 'upgrade';
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_cache_bypass $http_upgrade;
 }
 ```
 
